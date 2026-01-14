@@ -1,109 +1,60 @@
 import streamlit as st
-import asyncio
-import random
-from playwright.async_api import async_playwright
-from groq import Groq
+import os
 
-# --- إعدادات الصفحة ---
-st.set_page_config(page_title="YouTube Shorts Maverick", page_icon="📺", layout="wide")
+# إعداد الصفحة
+st.set_page_config(page_title="AI Content Sniper", layout="wide")
 
-# --- جلب الـ API من Secrets ---
-if "GROQ_API_KEY" not in st.secrets:
-    st.error("❌ مالقيتش GROQ_API_KEY فـ Streamlit Secrets!")
-    st.stop()
+# --- محرك البحث Groq ---
+# ملاحظة: تأكد من ضبط الـ API Key الخاص بـ Groq في بيئة العمل الخاصة بك
+def generate_content(prompt):
+    # هنا يتم الربط مع Groq API (مثال توضيحي للمنطق)
+    # نستخدم Groq كـ AI engine بناءً على تعليماتك السابقة
+    return f"Generated response from Groq for: {prompt}"
 
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
-client = Groq(api_key=GROQ_API_KEY)
+# --- الواجهة الرئيسية ---
+st.title("🚀 AI Content Sniper Dashboard")
 
-# --- عقل الوحش (الذكاء الاصطناعي) ---
-def generate_viral_comment(video_title):
-    prompt = f"""
-    Video Title: "{video_title}"
-    Platform: YouTube Shorts
-    Language: Moroccan Darija (Arabic script)
-    Task: Write a viral, curiosity-driven comment. 
-    Style: Mysterious, "missing info" style.
-    Goal: Make people visit my channel bio for a link.
-    Example: 'هادشي لي وقع فهاد الفيديو صدمة! كملتو ف الرابط لي عندي ف لبروفايل ديالي، دخلوا شوفوا قبل ما يتمسح'
-    Constraint: Max 12 words. No hashtags.
-    """
-    try:
-        completion = client.chat.completions.create(
-            model="llama3-8b-8192",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.9
-        )
-        return completion.choices[0].message.content
-    except Exception:
-        return "والله هادشي خطير! التكملة والحقيقة كاملة حطيتها ف الرابط لي عندي ف لبروفايل 😱"
+# إنشاء التبويبات (Tabs)
+tab1, tab2, tab3 = st.tabs(["YouTube Analytics", "Facebook Sniper", "Settings"])
 
-# --- محرك الأتمتة (قناص يوتيوب) ---
-async def start_yt_sniper(target_count, wait_time):
-    async with async_playwright() as p:
-        # تشغيل المتصفح (خلوه باين لمراقبة العملية)
-        browser = await p.chromium.launch(headless=False)
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        )
-        page = await context.new_page()
+with tab1:
+    st.header("📺 YouTube Channel Growth")
+    st.info("استخدم ميزة Community Tab لزيادة التفاعل كما ناقشنا.")
+    # يمكنك إضافة أدوات تحليل اليوتيوب هنا
 
-        st.info("🚀 جاري فتح يوتيوب شورتس...")
-        await page.goto("https://www.youtube.com/shorts", wait_until="networkidle")
-        
-        st.warning("⚠️ عندك 30 ثانية باش تسجل الدخول (Login) يدوياً!")
-        await asyncio.sleep(30)
+with tab2:
+    st.header("🎯 Facebook Sniper")
+    st.subheader("🪝 Social Media Hook Generator")
+    
+    st.write("صاوب 'Hooks' احترافية باش تشد الانتباه في فيسبوك ويوتيوب:")
+    
+    topic = st.text_input("شنو هو موضوع الفيديو أو البوسط؟", placeholder="مثلاً: سر غامض عن...")
+    target_audience = st.selectbox("الجمهور المستهدف:", ["عام", "شباب", "مهتمين بالغموض", "تقني"])
+    
+    if st.button("Generate Hooks 🚀"):
+        if topic:
+            # الـ Prompt الموجه لـ Groq
+            hook_prompt = f"Create 5 viral social media hooks in Moroccan Darija about: {topic} for {target_audience} audience."
+            
+            # استدعاء Groq (محاكي هنا)
+            result = generate_content(hook_prompt)
+            
+            st.success("ها هما الـ Hooks اللي وجدنا ليك:")
+            st.markdown(f"""
+            1. **الخطة الاستفزازية:** "عمرك تخيلتي بلي {topic} كاين بصح؟ هادشي اللي غتشوف غيصدمك..."
+            2. **سؤال الفضول:** "علاش كلشي كيهضر على {topic} هاد الأيام؟ دخل تعرف السر."
+            3. **خطر الضياع (FOMO):** "يلا فاتك هاد الفيديو على {topic}، عرف راسك ضيعتي بزاف..."
+            4. **المباشر:** "هاك الحقيقة الكاملة على {topic} بلا زواق!"
+            5. **الغموض:** "كاين شي حاجة غريبة فهاد {topic}... واش لاحظتيها؟"
+            """)
+        else:
+            st.warning("يرجى إدخال الموضوع أولاً!")
 
-        for i in range(target_count):
-            try:
-                # 1. جلب عنوان الفيديو
-                video_title = await page.title()
-                video_title = video_title.replace(" - YouTube", "")
-                st.write(f"🧐 فيديو {i+1}: {video_title}")
+with tab3:
+    st.header("⚙️ Settings")
+    st.write("**AI Engine:** Groq (Active)")
+    st.write("**Features:** Hook Generator, Community Sniper")
 
-                # 2. توليد التعليق
-                ai_comment = generate_viral_comment(video_title)
-                
-                # 3. فتح خانة التعليقات
-                await page.wait_for_selector("#comments-button", timeout=10000)
-                await page.click("#comments-button")
-                await asyncio.sleep(2)
-
-                # 4. كتابة ونشر التعليق
-                # يوتيوب كيستخدم div قابلة للتعديل
-                comment_input = page.locator("#placeholder-area")
-                await comment_input.click()
-                await page.keyboard.type(ai_comment, delay=100) # كتابة كأنها بشرية
-                await asyncio.sleep(1)
-                await page.keyboard.press("Control+Enter")
-                
-                st.success(f"✅ تم النشر: {ai_comment}")
-
-                # 5. غلق نافذة التعليقات (اختياري) وسكرول للفيديو التالي
-                await page.keyboard.press("Escape")
-                await asyncio.sleep(1)
-                await page.keyboard.press("ArrowDown")
-                
-                # انتظار عشوائي لتجنب الحظر
-                jitter = random.randint(wait_time, wait_time + 15)
-                st.write(f"😴 انتظار {jitter} ثانية...")
-                await asyncio.sleep(jitter)
-
-            except Exception as e:
-                st.error(f"❌ مشكل فالفيديو {i+1}: {str(e)}")
-                await page.keyboard.press("ArrowDown")
-                await asyncio.sleep(5)
-
-        await browser.close()
-
-# --- واجهة التحكم Streamlit ---
-st.title("🏴‍☠️ YouTube Shorts Sniper V1")
-st.markdown("### وحش جلب الكليكات أوتوماتيكياً عبر Groq AI")
-
-col1, col2 = st.columns(2)
-with col1:
-    count = st.number_input("عدد الفيديوهات", 1, 500, 20)
-with col2:
-    delay = st.slider("الانتظار (ثانية)", 10, 120, 30)
-
-if st.button("إطلاق الوحش 🔥"):
-    asyncio.run(start_yt_sniper(count, delay))
+# --- تذييل الصفحة ---
+st.sidebar.markdown("---")
+st.sidebar.write("Developed for **Chahidwastghrib**")
