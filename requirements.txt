@@ -2,3 +2,5 @@ streamlit
 playwright
 groq
 python-dotenv
+asyncio
+
